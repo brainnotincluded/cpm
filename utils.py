@@ -26,11 +26,19 @@ class Brick:
                 print(error)
 
 
-    def move_follow_line(self, stop):
-        BP = self._brickPi
-        k = 0.9
+    def move_follow_line(self, stop, degrees=9999):
         
-        while True:
+        # Forward only
+        assert degrees >= 0
+        
+        BP = self._brickPi
+        k = 1.2
+        
+        # обнуляем энкодеры моторов
+        BP.reset_motor_encoder(BP.PORT_A | BP.PORT_D)
+                
+        ports = [BP.PORT_A, BP.PORT_D]
+        while self.get_motor_encoder_avg(ports) < degrees:
             try:
                 value1 = BP.get_sensor(BP.PORT_1)
                 value2 = BP.get_sensor(BP.PORT_4)
@@ -38,13 +46,14 @@ class Brick:
                 BP.set_motor_dps(BP.PORT_D, self._speed-(value1-value2)*k)
                 print("move", value1, " --- ", value2)
                 if stop():
-                    BP.set_motor_dps(BP.PORT_A | BP.PORT_D, 0)
-                    time.sleep(0.3)
                     break
             except brickpi3.SensorError as error:
                 print(error)
             
             time.sleep(0.02)
+        # Stopping
+        BP.set_motor_dps(BP.PORT_A | BP.PORT_D, 0)
+        time.sleep(0.3)
     
     def move_for_degrees(self, degrees):
         import math

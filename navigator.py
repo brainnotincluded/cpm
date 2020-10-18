@@ -1,6 +1,7 @@
 class Navigator:
     def __init__(self, brickPi):
         self._brickPi = brickPi
+        self._rot_deg = 150
         
     def move(self, ncode):
         d = {
@@ -21,11 +22,11 @@ class Navigator:
         print('f')
     
     def right(self):
-        self._brickPi.rotate(-135)
+        self._brickPi.rotate(-self._rot_deg)
         print('r')
         
     def left(self):
-        self._brickPi.rotate(135)
+        self._brickPi.rotate(self._rot_deg)
         print('l')
         
     def start(self):
