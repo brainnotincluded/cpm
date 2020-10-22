@@ -13,7 +13,8 @@ class Brick:
         BP = self._brickPi
         BP.set_sensor_type(BP.PORT_1, BP.SENSOR_TYPE.EV3_COLOR_REFLECTED)
         BP.set_sensor_type(BP.PORT_4, BP.SENSOR_TYPE.EV3_COLOR_REFLECTED)
-        self.wait_sensors_ready([BP.PORT_1, BP.PORT_4])
+        BP.set_sensor_type(BP.PORT_2, BP.SENSOR_TYPE.TOUCH)
+        self.wait_sensors_ready([BP.PORT_1, BP.PORT_4, BP.PORT_2])
         self._speed = 180
 
     def wait_sensors_ready(self, sensors):
@@ -44,7 +45,7 @@ class Brick:
                 value2 = BP.get_sensor(BP.PORT_4)
                 BP.set_motor_dps(BP.PORT_A, self._speed+(value1-value2)*k)
                 BP.set_motor_dps(BP.PORT_D, self._speed-(value1-value2)*k)
-                print("move", value1, " --- ", value2)
+                #print("move", value1, " --- ", value2)
                 if stop():
                     break
             except brickpi3.SensorError as error:
@@ -132,12 +133,11 @@ class Brick:
         
         BP.set_motor_dps(BP.PORT_A | BP.PORT_D, 0)
         time.sleep(0.3)
-    
-if __name__ == '__main__':
-    b = Brick()
-    try:
-        b.rotate(135)
-        #b.move_follow_line(b.stop_if_line)
-        #b.move_for_degrees(140)
-    finally: # except the program gets interrupted by Ctrl+C on the keyboard.
-        b.reset_all()    
+
+    def wait_button(self):
+        BP = self._brickPi
+        value = BP.get_sensor(BP.PORT_2)
+        while not value:
+            value = BP.get_sensor(BP.PORT_2)
+            time.sleep(0.1)
+        return True

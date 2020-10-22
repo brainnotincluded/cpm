@@ -1,6 +1,6 @@
 def bar_code(b):
     bs = []
-    b.move_for_degrees(20)
+    b.move_for_degrees(60)
     b.move_follow_line(b.stop_if_line)
     b.move_for_degrees(20)
     b.move_for_degrees(20)

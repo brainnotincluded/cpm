@@ -26,7 +26,7 @@ print("BL disabled")
 for i in range(10000000):
     #lcd.home()
     lcd.cursor_pos = (2, 2)
-    lcd.write_string(u'Hello!!!' + str(i))
+    lcd.write_string('Hello!!!')
     #lcd.crlf()
     time.sleep(0.2)
 lcd.clear()
