@@ -6,6 +6,7 @@ from utils import Brick
 from bellman.config import Config
 from RPLCD.i2c import CharLCD
 import time
+from json_reader import json_reader
 
 
 def lcd_blink():
@@ -20,6 +21,9 @@ def lcd_print(msg):
     lcd.write_string(msg)
     
 try:
+    Config.edges = json_reader('/home/pi/Documents/cpm/edges.txt')
+    print(Config.edges)
+    
     lcd = CharLCD('PCF8574', 0x27)
     b = Brick()
     n = Navigator(b)
@@ -42,7 +46,8 @@ try:
     b.move_follow_line(b.stop_if_line)
     
     # Move to target position
-    path, fin_state = find_path('a3f', bs)
+    print("Target: " + bs)
+    path, fin_state = find_path('a3f', bs, iterations=170)
     b.move_for_degrees(140)
     n.move(path)
     

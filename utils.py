@@ -15,6 +15,7 @@ class Brick:
         BP.set_sensor_type(BP.PORT_4, BP.SENSOR_TYPE.EV3_COLOR_REFLECTED)
         BP.set_sensor_type(BP.PORT_2, BP.SENSOR_TYPE.TOUCH)
         self.wait_sensors_ready([BP.PORT_1, BP.PORT_4, BP.PORT_2])
+        BP.reset_motor_encoder(BP.PORT_A | BP.PORT_D)
         self._speed = 180
 
     def wait_sensors_ready(self, sensors):
@@ -27,7 +28,7 @@ class Brick:
                 print(error)
 
 
-    def move_follow_line(self, stop, degrees=9999):
+    def move_follow_line(self, stop, degrees=9999, do_motor_stop=True):
         
         # Forward only
         assert degrees >= 0
@@ -36,10 +37,11 @@ class Brick:
         k = 1.2
         
         # обнуляем энкодеры моторов
-        BP.reset_motor_encoder(BP.PORT_A | BP.PORT_D)
+        #BP.reset_motor_encoder(BP.PORT_A | BP.PORT_D)
+        d0 = BP.get_motor_encoder(BP.PORT_A)
                 
         ports = [BP.PORT_A, BP.PORT_D]
-        while self.get_motor_encoder_avg(ports) < degrees:
+        while BP.get_motor_encoder(BP.PORT_A) - d0 < degrees:
             try:
                 value1 = BP.get_sensor(BP.PORT_1)
                 value2 = BP.get_sensor(BP.PORT_4)
@@ -51,10 +53,32 @@ class Brick:
             except brickpi3.SensorError as error:
                 print(error)
             
+        if do_motor_stop:
+            # Stopping
             time.sleep(0.02)
-        # Stopping
-        BP.set_motor_dps(BP.PORT_A | BP.PORT_D, 0)
-        time.sleep(0.3)
+            BP.set_motor_dps(BP.PORT_A | BP.PORT_D, 0)
+            time.sleep(0.3)
+    
+    def move_for_degrees_new(self, degrees, nonstop):
+        import math
+        
+        BP = self._brickPi
+        speed = self._speed
+        
+        # обнуляем энкодеры моторов
+        d0 = BP.get_motor_encoder(BP.PORT_A)
+        
+        # устанавливаем скорость вращения моторов
+        BP.set_motor_dps(BP.PORT_A | BP.PORT_D, math.copysign(speed, degrees))
+        
+        # ждем пока энкодеры не достинут целевого значения
+        ports = [BP.PORT_A, BP.PORT_D]
+        while BP.get_motor_encoder(BP.PORT_A) - d0 < degrees:
+            time.sleep(0.03)
+            
+        if not nonstop:
+            # тормозим!
+            self.stop_motors()
     
     def move_for_degrees(self, degrees):
         import math

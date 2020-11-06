@@ -1,7 +1,7 @@
 class Navigator:
     def __init__(self, brickPi):
         self._brickPi = brickPi
-        self._rot_deg = 150
+        self._rot_deg = 135
         
     def move(self, ncode):
         d = {
@@ -10,22 +10,26 @@ class Navigator:
             'r': self.right,
             's': self.start
         }
-        for c in ncode:
-            d[c]()
+        for i in range(len(ncode)):
+            c=ncode[i]
+            non_stop=False
+            if len(ncode) > i+1 and ncode[i+1] == c:
+                non_stop = True
+            d[c](non_stop)
                 
-    def forward(self):
+    def forward(self,nonstop=False):
         b = self._brickPi
         
-        b.move_follow_line(b.stop_if_line)
-        b.move_for_degrees(140)
+        b.move_follow_line(b.stop_if_line, do_motor_stop=False)
+        b.move_for_degrees_new(140, nonstop)
         
         print('f')
     
-    def right(self):
+    def right(self,nonstop=False):
         self._brickPi.rotate(-self._rot_deg)
         print('r')
         
-    def left(self):
+    def left(self,nonstop=False):
         self._brickPi.rotate(self._rot_deg)
         print('l')
         
